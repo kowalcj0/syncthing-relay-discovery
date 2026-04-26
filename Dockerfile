@@ -42,8 +42,8 @@ ENV REQUIREMENTS="ca-certificates openssl dumb-init"
 ########################################
 ARG RELAY_VERSION="v2.0.16"
 ARG DISCO_VERSION="v2.0.16"
-ENV RELAY_DOWNLOADURL="https://github.com/syncthing/relaysrv/releases/download/${RELAY_VERSION}/strelaysrv-linux-amd64-${RELAY_VERSION}.tar.gz"
-ENV DISCO_DOWNLOADURL="https://github.com/syncthing/discosrv/releases/download/${DISCO_VERSION}/stdiscosrv-linux-amd64-${DISCO_VERSION}.tar.gz"
+ENV RELAY_DOWNLOAD_URL="https://github.com/syncthing/relaysrv/releases/download/${RELAY_VERSION}/strelaysrv-linux-amd64-${RELAY_VERSION}.tar.gz"
+ENV DISCO_DOWNLOAD_URL="https://github.com/syncthing/discosrv/releases/download/${DISCO_VERSION}/stdiscosrv-linux-amd64-${DISCO_VERSION}.tar.gz"
 ARG BUILD_DATE="2026-04-26T21:16:21Z"
 ########################################
 
@@ -56,8 +56,8 @@ RUN apt-get update -qqy \
 
 # install server
 WORKDIR /tmp/
-RUN curl -Ls ${RELAY_DOWNLOADURL} --output relaysrv.tar.gz \
-		&& curl -Ls ${DISCO_DOWNLOADURL} --output discosrv.tar.gz \
+RUN curl -Ls ${RELAY_DOWNLOAD_URL} --output relaysrv.tar.gz \
+		&& curl -Ls ${DISCO_DOWNLOAD_URL} --output discosrv.tar.gz \
 		&& tar -zxf relaysrv.tar.gz \
 		&& tar -zxf discosrv.tar.gz \
 		&& rm relaysrv.tar.gz \
