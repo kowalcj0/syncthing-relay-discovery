@@ -1,4 +1,10 @@
 # syncthing-relay-discovery
+
+This is a fork of [t4skforce/syncthing-relay-discovery](https://github.com/t4skforce/syncthing-relay-discovery) with few changes:
+* `supervisord` was replaced with [`dumb-init`](https://github.com/Yelp/dumb-init)
+* Dockerfile was updated to conform with newer specs and recommendations
+
+# Original project description
 Docker Container for the global relay server for the [http://syncthing.net/](http://syncthing.net/) project. I build the container because there was no official one. This build is listening on the gihub project of the relay server and gets updated whenever there is a code change. [relaysrv GitHub repo](https://github.com/syncthing/relaysrv) and [dicosrv GitHub repo](https://github.com/syncthing/discosrv). The container is intended for people who like to roll their own private syncthing "cloud".
 
 The files for this container can be found at my [GitHub repo](https://github.com/t4skforce/syncthing-relay-discovery)
@@ -13,15 +19,15 @@ This build is based on [debian:latest](https://hub.docker.com/_/debian/) and ins
 
 # How to use this image
 
-`docker run --name syncthing-relay -d -p 22067:22067 --restart=always t4skforce/syncthing-relay-discovery:latest`
+`docker run --name syncthing-relay -d -p 22067:22067 --restart=always kowalcj0/syncthing-relay-discovery:latest`
 
 This will store the certificates and all of the data in `/home/syncthing/`. You will probably want to make at least the certificate folder a persistent volume (recommended):
 
-`docker run --name syncthing-relay -d -p 22067:22067 -v /your/home:/home/syncthing/certs --restart=always t4skforce/syncthing-relay-discovery:latest`
+`docker run --name syncthing-relay -d -p 22067:22067 -v /your/home:/home/syncthing/certs --restart=always kowalcj0/syncthing-relay-discovery:latest`
 
 If you already have certificates generated and want to use them and protect the folder from being changed by the docker images use the following command:
 
-`docker run --name syncthing-relay -d -p 22067:22067 -v /your/home:/home/syncthing/certs:ro --restart=always t4skforce/syncthing-relay-discovery:latest`
+`docker run --name syncthing-relay -d -p 22067:22067 -v /your/home:/home/syncthing/certs:ro --restart=always kowalcj0/syncthing-relay-discovery:latest`
 
 Creating cert directory and setting permissions (docker process is required to have access):
 ```bash
@@ -37,13 +43,13 @@ Example enabling debug mode:
 ```bash
 export RELAY_OPTS='-debug'
 export DISCO_OPTS='-debug'
-docker run --name syncthing-relay-discovery -d -p 22067:22067 -p 22026:22026 --restart=always t4skforce/syncthing-relay-discovery:latest
+docker run --name syncthing-relay-discovery -d -p 22067:22067 -p 22026:22026 --restart=always kowalcj0/syncthing-relay-discovery:latest
 ```
 
 or
 
 ```bash
-docker run --name syncthing-relay-discovery -d -p 22067:22067 -p 22026:22026 -e RELAY_OPTS='-debug' -e DISCO_OPTS='-debug' --restart=always t4skforce/syncthing-relay-discovery:latest
+docker run --name syncthing-relay-discovery -d -p 22067:22067 -p 22026:22026 -e RELAY_OPTS='-debug' -e DISCO_OPTS='-debug' --restart=always kowalcj0/syncthing-relay-discovery:latest
 ```
 
 ## Docker Compose
@@ -56,7 +62,7 @@ services:
   syncthing-relay-discovery:
     container_name: syncthing
     restart: always
-    image: t4skforce/syncthing-relay-discovery:latest
+    image: kowalcj0/syncthing-relay-discovery:latest
     environment:
       RELAY_OPTS: '-debug'
       DISC_OPTS: '-debug'

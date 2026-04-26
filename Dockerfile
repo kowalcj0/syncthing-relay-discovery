@@ -34,17 +34,17 @@ ENV APPUID=1000
 ENV APPGID=1000
 ENV USER_HOME=/home/syncthing
 ENV BUILD_REQUIREMENTS=curl
-ENV REQUIREMENTS="ca-certificates openssl supervisor"
+ENV REQUIREMENTS="ca-certificates openssl dumb-init"
 ########################################
 
 ########################################
 #               Build                  #
 ########################################
-ARG RELAY_VERSION="v1.29.6"
-ARG DISCO_VERSION="v1.29.6"
-ARG RELAY_DOWNLOADURL="https://github.com/syncthing/relaysrv/releases/download/v1.29.6/strelaysrv-linux-amd64-v1.29.6.tar.gz"
-ARG DISCO_DOWNLOADURL="https://github.com/syncthing/discosrv/releases/download/v1.29.6/stdiscosrv-linux-amd64-v1.29.6.tar.gz"
-ARG BUILD_DATE="2025-05-12T07:16:21Z"
+ARG RELAY_VERSION="v2.0.16"
+ARG DISCO_VERSION="v2.0.16"
+ENV RELAY_DOWNLOAD_URL="https://github.com/syncthing/relaysrv/releases/download/${RELAY_VERSION}/strelaysrv-linux-amd64-${RELAY_VERSION}.tar.gz"
+ENV DISCO_DOWNLOAD_URL="https://github.com/syncthing/discosrv/releases/download/${DISCO_VERSION}/stdiscosrv-linux-amd64-${DISCO_VERSION}.tar.gz"
+ARG BUILD_DATE="2026-04-26T21:16:21Z"
 ########################################
 
 USER root
@@ -52,13 +52,12 @@ ENV DEBIAN_FRONTEND=noninteractive
 # setup
 RUN apt-get update -qqy \
 	&& apt-get -qqy --no-install-recommends install ${BUILD_REQUIREMENTS} ${REQUIREMENTS} \
-	&& mkdir -p ${USER_HOME} \
-	&& mkdir -p /var/log/supervisor
+	&& mkdir -p ${USER_HOME}
 
 # install server
 WORKDIR /tmp/
-RUN curl -Ls ${RELAY_DOWNLOADURL} --output relaysrv.tar.gz \
-		&& curl -Ls ${DISCO_DOWNLOADURL} --output discosrv.tar.gz \
+RUN curl -Ls ${RELAY_DOWNLOAD_URL} --output relaysrv.tar.gz \
+		&& curl -Ls ${DISCO_DOWNLOAD_URL} --output discosrv.tar.gz \
 		&& tar -zxf relaysrv.tar.gz \
 		&& tar -zxf discosrv.tar.gz \
 		&& rm relaysrv.tar.gz \
@@ -70,11 +69,8 @@ RUN curl -Ls ${RELAY_DOWNLOADURL} --output relaysrv.tar.gz \
 		&& rm -rf /var/lib/apt/lists/* \
 		&& rm -rf /tmp/*
 
-# supervisor
-COPY supervisord.conf ${USER_HOME}/supervisord.conf
-COPY start_relay.sh ${USER_HOME}/server/start_relay.sh
-COPY start_discovery.sh ${USER_HOME}/server/start_discovery.sh
-RUN chmod +x ${USER_HOME}/server/start_relay.sh ${USER_HOME}/server/start_discovery.sh \
+COPY start.sh ${USER_HOME}/server/start.sh
+RUN chmod +x ${USER_HOME}/server/start.sh \
 		&& groupadd --system --gid ${APPGID} ${USERGROUP} \
 		&& useradd --system --uid ${APPUID} -g ${USERGROUP} ${USERNAME} --home ${USER_HOME} \
 		&& echo "${USERNAME}:$(openssl rand 512 | openssl sha256 | awk '{print $2}')" | chpasswd \
@@ -85,4 +81,9 @@ VOLUME ${USER_HOME}/certs
 
 USER $USERNAME
 WORKDIR ${USER_HOME}/server/
-CMD ["/usr/bin/supervisord", "-c", "${USER_HOME}/supervisord.conf"]
+
+# https://github.com/Yelp/dumb-init#usage
+ENTRYPOINT ["/usr/bin/dumb-init", "--"]
+
+# Runs "/usr/bin/dumb-init -- ./start.sh"
+CMD ["./start.sh"]
